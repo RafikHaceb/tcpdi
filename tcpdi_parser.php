@@ -47,32 +47,45 @@
  * @version 1.1
  */
 
-if (!defined ('PDF_TYPE_NULL'))
-    define ('PDF_TYPE_NULL', 0);
-if (!defined ('PDF_TYPE_NUMERIC'))
-    define ('PDF_TYPE_NUMERIC', 1);
-if (!defined ('PDF_TYPE_TOKEN'))
-    define ('PDF_TYPE_TOKEN', 2);
-if (!defined ('PDF_TYPE_HEX'))
-    define ('PDF_TYPE_HEX', 3);
-if (!defined ('PDF_TYPE_STRING'))
-    define ('PDF_TYPE_STRING', 4);
-if (!defined ('PDF_TYPE_DICTIONARY'))
-    define ('PDF_TYPE_DICTIONARY', 5);
-if (!defined ('PDF_TYPE_ARRAY'))
-    define ('PDF_TYPE_ARRAY', 6);
-if (!defined ('PDF_TYPE_OBJDEC'))
-    define ('PDF_TYPE_OBJDEC', 7);
-if (!defined ('PDF_TYPE_OBJREF'))
-    define ('PDF_TYPE_OBJREF', 8);
-if (!defined ('PDF_TYPE_OBJECT'))
-    define ('PDF_TYPE_OBJECT', 9);
-if (!defined ('PDF_TYPE_STREAM'))
-    define ('PDF_TYPE_STREAM', 10);
-if (!defined ('PDF_TYPE_BOOLEAN'))
-    define ('PDF_TYPE_BOOLEAN', 11);
-if (!defined ('PDF_TYPE_REAL'))
-    define ('PDF_TYPE_REAL', 12);
+if (!defined ('PDF_TYPE_NULL')) {
+    define('PDF_TYPE_NULL', 0);
+}
+if (!defined ('PDF_TYPE_NUMERIC')) {
+    define('PDF_TYPE_NUMERIC', 1);
+}
+if (!defined ('PDF_TYPE_TOKEN')) {
+    define('PDF_TYPE_TOKEN', 2);
+}
+if (!defined ('PDF_TYPE_HEX')) {
+    define('PDF_TYPE_HEX', 3);
+}
+if (!defined ('PDF_TYPE_STRING')) {
+    define('PDF_TYPE_STRING', 4);
+}
+if (!defined ('PDF_TYPE_DICTIONARY')) {
+    define('PDF_TYPE_DICTIONARY', 5);
+}
+if (!defined ('PDF_TYPE_ARRAY')) {
+    define('PDF_TYPE_ARRAY', 6);
+}
+if (!defined ('PDF_TYPE_OBJDEC')) {
+    define('PDF_TYPE_OBJDEC', 7);
+}
+if (!defined ('PDF_TYPE_OBJREF')) {
+    define('PDF_TYPE_OBJREF', 8);
+}
+if (!defined ('PDF_TYPE_OBJECT')) {
+    define('PDF_TYPE_OBJECT', 9);
+}
+if (!defined ('PDF_TYPE_STREAM')) {
+    define('PDF_TYPE_STREAM', 10);
+}
+if (!defined ('PDF_TYPE_BOOLEAN')) {
+    define('PDF_TYPE_BOOLEAN', 11);
+}
+if (!defined ('PDF_TYPE_REAL')) {
+    define('PDF_TYPE_REAL', 12);
+}
 
 /**
  * @class tcpdi_parser
@@ -241,8 +254,9 @@ class tcpdi_parser {
      */
     public function getPDFVersion() {
         preg_match('/\d\.\d/', substr($this->pdfdata, 0, 16), $m);
-        if (isset($m[0]))
+        if (isset($m[0])) {
             $this->pdfVersion = $m[0];
+        }
         return $this->pdfVersion;
     }
 
@@ -896,13 +910,15 @@ class tcpdi_parser {
                 $i--;
                 $dict .= '>>';
                 $offset += 2;
-            } else if ($data[$offset] == '<' && $data[$offset+1] == '<') {
-                $i++;
-                $dict .= '<<';
-                $offset += 2;
             } else {
-                $dict .= $data[$offset];
-                $offset++;
+                if ($data[$offset] == '<' && $data[$offset + 1] == '<') {
+                    $i++;
+                    $dict .= '<<';
+                    $offset += 2;
+                } else {
+                    $dict .= $data[$offset];
+                    $offset++;
+                }
             }
         } while ($i>0);
 
@@ -1204,16 +1220,18 @@ class tcpdi_parser {
         // parent object.
         if (isset ($obj[1][1]['/Resources'])) {
             $res = $obj[1][1]['/Resources'];
-            if ($res[0] == PDF_TYPE_OBJECT)
+            if ($res[0] == PDF_TYPE_OBJECT) {
                 return $res[1];
+            }
             return $res;
         } else {
             if (!isset ($obj[1][1]['/Parent'])) {
                 return false;
             } else {
                 $res = $this->_getPageResources($obj[1][1]['/Parent']);
-                if ($res[0] == PDF_TYPE_OBJECT)
+                if ($res[0] == PDF_TYPE_OBJECT) {
                     return $res[1];
+                }
                 return $res;
             }
         }
@@ -1250,8 +1268,9 @@ class tcpdi_parser {
             }
         }
 
-        if ($annots[0] == PDF_TYPE_OBJREF)
+        if ($annots[0] == PDF_TYPE_OBJREF) {
             return $this->getObjectVal($annots);
+        }
         return $annots;
     }
 
@@ -1349,8 +1368,9 @@ class tcpdi_parser {
     public function getPageBox($page, $box_index, $k) {
         $page = $this->getObjectVal($page);
         $box = null;
-        if (isset($page[1][1][$box_index]))
+        if (isset($page[1][1][$box_index])) {
             $box =& $page[1][1][$box_index];
+        }
 
         if (!is_null($box) && $box[0] == PDF_TYPE_OBJREF) {
             $tmp_box = $this->getObjectVal($box);
@@ -1418,16 +1438,18 @@ class tcpdi_parser {
         $obj = $this->getObjectVal($obj);
         if (isset ($obj[1][1]['/Rotate'])) {
             $res = $this->getObjectVal($obj[1][1]['/Rotate']);
-            if ($res[0] == PDF_TYPE_OBJECT)
+            if ($res[0] == PDF_TYPE_OBJECT) {
                 return $res[1];
+            }
             return $res;
         } else {
             if (!isset ($obj[1][1]['/Parent'])) {
                 return false;
             } else {
                 $res = $this->_getPageRotation($obj[1][1]['/Parent']);
-                if ($res[0] == PDF_TYPE_OBJECT)
+                if ($res[0] == PDF_TYPE_OBJECT) {
                     return $res[1];
+                }
                 return $res;
             }
         }

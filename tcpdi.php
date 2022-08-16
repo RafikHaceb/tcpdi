@@ -102,8 +102,9 @@ class TCPDI extends FPDF_TPL {
     public function setSourceFile($filename) {
         $this->current_filename = $filename;
 
-        if (!isset($this->parsers[$filename]))
+        if (!isset($this->parsers[$filename])) {
             $this->parsers[$filename] = $this->_getPdfParser($filename);
+        }
         $this->current_parser =& $this->parsers[$filename];
         $this->setPDFVersion(max($this->getPDFVersion(), $this->current_parser->getPDFVersion()));
 
@@ -120,8 +121,9 @@ class TCPDI extends FPDF_TPL {
         $filename = uniqid('tcpdi-');
         $this->current_filename = $filename;
 
-        if (!isset($this->parsers[$filename]))
+        if (!isset($this->parsers[$filename])) {
             $this->parsers[$filename] = new tcpdi_parser($pdfdata, $filename);
+        }
         $this->current_parser =& $this->parsers[$filename];
         $this->setPDFVersion(max($this->getPDFVersion(), $this->current_parser->getPDFVersion()));
 
@@ -172,14 +174,16 @@ class TCPDI extends FPDF_TPL {
 
         // check if page already imported
         $pageKey = $fn . '-' . ((int)$pageno) . $boxName;
-        if (isset($this->_importedPages[$pageKey]))
+        if (isset($this->_importedPages[$pageKey])) {
             return $this->_importedPages[$pageKey];
+        }
 
         $parser =& $this->parsers[$fn];
         $parser->setPageno($pageno);
 
-        if (!in_array($boxName, $parser->availableBoxes))
+        if (!in_array($boxName, $parser->availableBoxes)) {
             return $this->Error(sprintf('Unknown box: %s', $boxName));
+        }
 
         $pageboxes = $parser->getPageBoxes($pageno, $this->k);
 
@@ -190,13 +194,16 @@ class TCPDI extends FPDF_TPL {
          * TrimBox: Default -> CropBox
          * ArtBox: Default -> CropBox
          */
-        if (!isset($pageboxes[$boxName]) && ($boxName == '/BleedBox' || $boxName == '/TrimBox' || $boxName == '/ArtBox'))
+        if (!isset($pageboxes[$boxName]) && ($boxName == '/BleedBox' || $boxName == '/TrimBox' || $boxName == '/ArtBox')) {
             $boxName = '/CropBox';
-        if (!isset($pageboxes[$boxName]) && $boxName == '/CropBox')
+        }
+        if (!isset($pageboxes[$boxName]) && $boxName == '/CropBox') {
             $boxName = '/MediaBox';
+        }
 
-        if (!isset($pageboxes[$boxName]))
+        if (!isset($pageboxes[$boxName])) {
             return false;
+        }
 
         $this->lastUsedPageBox = $boxName;
 
@@ -228,8 +235,9 @@ class TCPDI extends FPDF_TPL {
             $tpl['w'] = $steps % 2 == 0 ? $_w : $_h;
             $tpl['h'] = $steps % 2 == 0 ? $_h : $_w;
 
-            if ($angle < 0)
+            if ($angle < 0) {
                 $angle += 360;
+            }
 
             $tpl['_rotationAngle'] = $angle * -1;
         }
@@ -498,8 +506,9 @@ class TCPDI extends FPDF_TPL {
                 $this->_out('<</ProcSet [/PDF /Text /ImageB /ImageC /ImageI]');
                 if (isset($this->_res['tpl'][$tplidx]['fonts']) && count($this->_res['tpl'][$tplidx]['fonts'])) {
                     $this->_out('/Font <<');
-                    foreach($this->_res['tpl'][$tplidx]['fonts'] as $font)
+                    foreach($this->_res['tpl'][$tplidx]['fonts'] as $font) {
                         $this->_out('/F' . $font['i'] . ' ' . $font['n'] . ' 0 R');
+                    }
                     $this->_out('>>');
                 }
                 if(isset($this->_res['tpl'][$tplidx]['images']) && count($this->_res['tpl'][$tplidx]['images']) ||
@@ -507,12 +516,14 @@ class TCPDI extends FPDF_TPL {
                 {
                     $this->_out('/XObject <<');
                     if (isset($this->_res['tpl'][$tplidx]['images']) && count($this->_res['tpl'][$tplidx]['images'])) {
-                        foreach($this->_res['tpl'][$tplidx]['images'] as $image)
+                        foreach($this->_res['tpl'][$tplidx]['images'] as $image) {
                             $this->_out('/I' . $image['i'] . ' ' . $image['n'] . ' 0 R');
+                        }
                     }
                     if (isset($this->_res['tpl'][$tplidx]['tpls']) && count($this->_res['tpl'][$tplidx]['tpls'])) {
-                        foreach($this->_res['tpl'][$tplidx]['tpls'] as $i => $tpl)
+                        foreach($this->_res['tpl'][$tplidx]['tpls'] as $i => $tpl) {
                             $this->_out($this->tplprefix . $i . ' ' . $tpl['n'] . ' 0 R');
+                        }
                     }
                     $this->_out('>>');
                 }
@@ -788,8 +799,9 @@ class TCPDI extends FPDF_TPL {
                         $out .= chr(0x0A);
                         break;
                     case "\r":
-                        if ($count != $n-1 && $s[$count+1] == "\n")
+                        if ($count != $n-1 && $s[$count+1] == "\n") {
                             $count++;
+                        }
                         break;
                     case "\n":
                         break;
