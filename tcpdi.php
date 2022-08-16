@@ -245,7 +245,7 @@ class TCPDI extends FPDF_TPL {
         $parser->setPageno($pageno);
         $boxes = $parser->getPageBoxes($pageno, $this->k);
         foreach ($boxes as $name => $box) {
-            if ($name{0} == '/') {
+            if ($name[0] == '/') {
                 $boxes[substr($name, 1)] = $box;
                 unset($boxes[$name]);
             }
