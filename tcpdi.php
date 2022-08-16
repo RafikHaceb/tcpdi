@@ -37,7 +37,7 @@ class TCPDI extends FPDF_TPL {
      * Parser-Objects
      * @var array
      */
-    public $parsers = array();
+    public $parsers = [];
 
     /**
      * Current parser
@@ -49,13 +49,13 @@ class TCPDI extends FPDF_TPL {
      * object stack
      * @var array
      */
-    protected $_obj_stack = array();
+    protected $_obj_stack = [];
 
     /**
      * done object stack
      * @var array
      */
-    protected $_don_obj_stack = array();
+    protected $_don_obj_stack = [];
 
     /**
      * Current Object Id.
@@ -73,13 +73,13 @@ class TCPDI extends FPDF_TPL {
      * Cache for imported pages/template ids
      * @var array
      */
-    protected $_importedPages = array();
+    protected $_importedPages = [];
 
     /**
      * Cache for imported page annotations
      * @var array
      */
-    protected $_importedAnnots  = array();
+    protected $_importedAnnots  = [];
 
     /**
      * Number of TOC pages, used for annotation offset
@@ -210,7 +210,7 @@ class TCPDI extends FPDF_TPL {
         $box = $pageboxes[$boxName];
 
         $this->tpl++;
-        $this->tpls[$this->tpl] = array();
+        $this->tpls[$this->tpl] = [];
         $tpl =& $this->tpls[$this->tpl];
         $tpl['parser'] =& $parser;
         $tpl['resources'] = $parser->getPageResources();
@@ -274,7 +274,7 @@ class TCPDI extends FPDF_TPL {
     }
 
     /* Wrapper for AddTOC() which tracks TOC position to offset annotations later */
-    public function AddTOC($page='', $numbersfont='', $filler='.', $toc_name='TOC', $style='', $color=array(0,0,0)) {
+    public function AddTOC($page='', $numbersfont='', $filler='.', $toc_name='TOC', $style='', $color= [0,0,0]) {
         if (!TCPDF_STATIC::empty_string($page)) {
             $this->_TOCpagenum = $page;
         } else {
@@ -295,10 +295,10 @@ class TCPDI extends FPDF_TPL {
                 && is_array($annots[1][1]) && count($annots[1][1] > 1) // It's not empty - there are annotations for this page
         ) {
             if (!isset($this->_obj_stack[$fn])) {
-                $this->_obj_stack[$fn] = array();
+                $this->_obj_stack[$fn] = [];
             }
 
-            $this->_importedAnnots[$this->page] = array();
+            $this->_importedAnnots[$this->page] = [];
             foreach ($annots[1][1] as $annot) {
                 $this->importAnnotation($annot);
             }
@@ -308,11 +308,11 @@ class TCPDI extends FPDF_TPL {
     public function importAnnotation($annotation) {
         $fn = $this->current_filename;
         $old_id = $annotation[1];
-        $value = array(PDF_TYPE_OBJREF, $old_id, 0);
+        $value = [PDF_TYPE_OBJREF, $old_id, 0];
         if (!isset($this->_don_obj_stack[$fn][$old_id])) {
             $this->_newobj(false, true);
-            $this->_obj_stack[$fn][$old_id] = array($this->n, $value);
-            $this->_don_obj_stack[$fn][$old_id] = array($this->n, $value);
+            $this->_obj_stack[$fn][$old_id] = [$this->n, $value];
+            $this->_don_obj_stack[$fn][$old_id] = [$this->n, $value];
         }
         $objid = $this->_don_obj_stack[$fn][$old_id][0];
         $this->_importedAnnots[$this->page][] = $objid;
@@ -385,7 +385,7 @@ class TCPDI extends FPDF_TPL {
         if ($adjustPageSize == true && is_null($_x) && is_null($_y)) {
             $size = $this->getTemplateSize($tplidx, $_w, $_h);
             $orientation = $size['w'] > $size['h'] ? 'L' : 'P';
-            $size = array($size['w'], $size['h']);
+            $size = [$size['w'], $size['h']];
 
             $this->setPageFormat($size, $orientation);
         }
@@ -584,10 +584,10 @@ class TCPDI extends FPDF_TPL {
             case PDF_TYPE_STREAM:
                 if ($this->encrypted) {
                     $value[2][1] = $this->_encrypt_data($this->_current_obj_id, $value[2][1]);
-                    $value[1][1]['/Length'] = array(
+                    $value[1][1]['/Length'] = [
                         PDF_TYPE_NUMERIC,
                         strlen($value[2][1])
-                    );
+                    ];
                 }
                 break;
 
@@ -650,8 +650,8 @@ class TCPDI extends FPDF_TPL {
 
                 if (!isset($this->_don_obj_stack[$cpfn][$value[1]])) {
                     $this->_newobj(false, true);
-                    $this->_obj_stack[$cpfn][$value[1]] = array($this->n, $value);
-                    $this->_don_obj_stack[$cpfn][$value[1]] = array($this->n, $value); // Value is maybee obsolete!!!
+                    $this->_obj_stack[$cpfn][$value[1]] = [$this->n, $value];
+                    $this->_don_obj_stack[$cpfn][$value[1]] = [$this->n, $value]; // Value is maybee obsolete!!!
                 }
                 $objid = $this->_don_obj_stack[$cpfn][$value[1]][0];
 
@@ -838,7 +838,7 @@ class TCPDI extends FPDF_TPL {
      * @return string
      */
     public function hex2str($hex) {
-        return pack('H*', str_replace(array("\r", "\n", ' '), '', $hex));
+        return pack('H*', str_replace(["\r", "\n", ' '], '', $hex));
     }
 
     /**
