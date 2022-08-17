@@ -326,7 +326,7 @@ class tcpdi_parser
      *
      * @return int
      */
-    function getPageCount(): int
+    public function getPageCount(): int
     {
         return $this->page_count;
     }
@@ -1090,7 +1090,7 @@ class tcpdi_parser
      * Extract object stream to find out what it contains.
      *
      */
-    function extractObjectStream($key)
+    public function extractObjectStream($key)
     {
         $objref = [PDF_TYPE_OBJREF, $key[0], $key[1]];
         $obj = $this->getObjectVal($objref);

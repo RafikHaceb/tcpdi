@@ -413,7 +413,7 @@ class FPDF_TPL extends FPDF
     /**
      * Private Method that writes the form xobjects
      */
-    private function _putformxobjects()
+    public function _putformxobjects()
     {
         $filter = ($this->compress) ? '/Filter /FlateDecode ' : '';
         reset($this->tpls);
@@ -485,7 +485,7 @@ class FPDF_TPL extends FPDF
      * Overwritten to add _putformxobjects() after _putimages()
      *
      */
-    protected function _putimages()
+    public function _putimages()
     {
         parent::_putimages();
         $this->_putformxobjects();
@@ -494,7 +494,7 @@ class FPDF_TPL extends FPDF
     /**
      * Private Method
      */
-    protected function _out($s)
+    public function _out($s)
     {
         if ($this->state == 2 && $this->_intpl) {
             $this->tpls[$this->tpl]['buffer'] .= $s . "\n";

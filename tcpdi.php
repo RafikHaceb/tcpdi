@@ -464,7 +464,7 @@ class TCPDI extends FPDF_TPL
     /**
      * Private Method that writes the form xobjects
      */
-    private function _putformxobjects()
+    public function _putformxobjects()
     {
         $filter = ($this->compress) ? '/Filter /FlateDecode ' : '';
         reset($this->tpls);
