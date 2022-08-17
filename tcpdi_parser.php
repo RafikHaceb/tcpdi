@@ -686,7 +686,7 @@ class tcpdi_parser {
      * Get raw stream data
      * @param $offset (int) Stream offset.
      * @param $length (int) Stream length.
-     * @return string Steam content
+     * @return array Steam content
      * @protected
      */
     protected function getRawStream($offset, $length) {
@@ -945,7 +945,6 @@ class tcpdi_parser {
         $obj = explode('_', $obj_ref);
         if (($obj === false) || (count($obj) != 2)) {
             $this->error('Invalid object reference: '.$obj);
-            return;
         }
         $objref = $obj[0].' '.$obj[1].' obj';
 
@@ -1356,7 +1355,7 @@ class tcpdi_parser {
      * @param array $page a /Page
      * @param string $box_index Type of Box @see $availableBoxes
      * @param float Scale factor from user space units to points
-     * @return array
+     * @return array|bool
      */
     public function getPageBox($page, $box_index, $k) {
         $page = $this->getObjectVal($page);
@@ -1382,11 +1381,11 @@ class tcpdi_parser {
                 'urx' => max($b[0][1], $b[2][1]) / $k,
                 'ury' => max($b[1][1], $b[3][1]) / $k,
             ];
-        } elseif (!isset ($page[1][1]['/Parent'])) {
-            return false;
-        } else {
-            return $this->getPageBox($this->getObjectVal($page[1][1]['/Parent']), $box_index, $k);
         }
+        if (!isset ($page[1][1]['/Parent'])) {
+            return false;
+        }
+        return $this->getPageBox($this->getObjectVal($page[1][1]['/Parent']), $box_index, $k);
     }
 
     /**

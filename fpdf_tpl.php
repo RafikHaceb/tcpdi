@@ -76,11 +76,10 @@ class FPDF_TPL extends FPDF {
     function beginTemplate($x = null, $y = null, $w = null, $h = null) {
         if (is_subclass_of($this, 'TCPDF')) {
             $this->Error('This method is only usable with FPDF. Use TCPDF methods startTemplate() instead.');
-            return;
         }
         
         if ($this->page <= 0) {
-            $this->error("You have to add a page to fpdf first!");
+            $this->Error("You have to add a page to fpdf first!");
         }
 
         if ($x == null) {
@@ -256,7 +255,7 @@ class FPDF_TPL extends FPDF {
      * @param int $tplidx A valid template-Id
      * @param int $_w The width of the template
      * @param int $_h The height of the template
-     * @return array The height and width of the template
+     * @return array|bool The height and width of the template
      */
     function getTemplateSize($tplidx, $_w = 0, $_h = 0) {
         if (!isset($this->tpls[$tplidx])) {
@@ -284,6 +283,7 @@ class FPDF_TPL extends FPDF {
     
     /**
      * See FPDF/TCPDF-Documentation ;-)
+     * @return void
      */
     public function SetFont($family, $style = '', $size = 0, $fontfile='', $subset='default', $out=true) {
         if (is_subclass_of($this, 'TCPDF')) {
@@ -329,6 +329,7 @@ class FPDF_TPL extends FPDF {
      * See FPDF-Documentation ;-)
      *
      * AddPage is not available when you're "in" a template.
+     * @return void
      */
     function AddPage($orientation = '', $format = '', $keepmargins = false, $tocpage = false) {
         if (is_subclass_of($this, 'TCPDF')) {
@@ -345,6 +346,7 @@ class FPDF_TPL extends FPDF {
 
     /**
      * Preserve adding Links in Templates ...won't work
+     * @return void
      */
     function Link($x, $y, $w, $h, $link, $spaces = 0) {
         if (is_subclass_of($this, 'TCPDF')) {
@@ -370,7 +372,10 @@ class FPDF_TPL extends FPDF {
         }
         return parent::AddLink();
     }
-    
+
+    /**
+     * @return void
+     */
     function SetLink($link, $y = 0, $page = -1) {
         if (is_subclass_of($this, 'TCPDF')) {
             $args = func_get_args();

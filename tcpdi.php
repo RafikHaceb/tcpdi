@@ -153,7 +153,7 @@ class TCPDI extends FPDF_TPL {
     /**
      * Set the PDF version
      *
-     * @return string
+     * @return void
      */
     public function setPDFVersion($version = '1.3') {
         $this->PDFVersion = $version;
@@ -167,7 +167,7 @@ class TCPDI extends FPDF_TPL {
      */
     public function importPage($pageno, $boxName = '/CropBox') {
         if ($this->_intpl) {
-            return $this->error('Please import the desired pages before creating a new template.');
+            $this->Error('Please import the desired pages before creating a new template.');
         }
 
         $fn = $this->current_filename;
@@ -182,7 +182,7 @@ class TCPDI extends FPDF_TPL {
         $parser->setPageno($pageno);
 
         if (!in_array($boxName, $parser->availableBoxes)) {
-            return $this->Error(sprintf('Unknown box: %s', $boxName));
+            $this->Error(sprintf('Unknown box: %s', $boxName));
         }
 
         $pageboxes = $parser->getPageBoxes($pageno, $this->k);
