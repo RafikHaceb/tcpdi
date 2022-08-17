@@ -22,31 +22,31 @@ class FPDF_TPL extends FPDF {
      * Array of Tpl-Data
      * @var array
      */
-    private $tpls = [];
+    protected $tpls = [];
 
     /**
      * Current Template-ID
      * @var int
      */
-    private $tpl = 0;
+    protected $tpl = 0;
     
     /**
      * "In Template"-Flag
      * @var boolean
      */
-    private $_intpl = false;
+    protected $_intpl = false;
     
     /**
      * Nameprefix of Templates used in Resources-Dictonary
      * @var string A String defining the Prefix used as Template-Object-Names. Have to beginn with an /
      */
-    private $tplprefix = "/TPL";
+    protected $tplprefix = "/TPL";
 
     /**
      * Resources used By Templates and Pages
      * @var array
      */
-    private $_res = [];
+    protected $_res = [];
     
     /**
      * Last used Template data
