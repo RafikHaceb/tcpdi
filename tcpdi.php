@@ -134,7 +134,7 @@ class TCPDI extends FPDF_TPL {
      * Returns a PDF parser object
      *
      * @param string $filename
-     * @return fpdi_pdf_parser
+     * @return tcpdi_parser
      */
     protected function _getPdfParser($filename) {
         $data = file_get_contents($filename);

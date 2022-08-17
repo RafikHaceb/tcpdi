@@ -193,7 +193,7 @@ class tcpdi_parser {
      */
     public function __construct($data, $uniqueid) {
         if (empty($data)) {
-            $this->Error('Empty PDF data.');
+            $this->error('Empty PDF data.');
         }
         $this->uniqueid = $uniqueid;
         $this->pdfdata = $data;
@@ -335,7 +335,7 @@ class tcpdi_parser {
         if ($offset == 0) {
             // find last startxref
             if (preg_match('/.*[\r\n]startxref[\s\r\n]+([0-9]+)[\s\r\n]+%%EOF/is', $this->pdfdata, $matches) == 0) {
-                $this->Error('Unable to find startxref');
+                $this->error('Unable to find startxref');
             }
             $startxref = $matches[1];
         } else {
@@ -346,7 +346,7 @@ class tcpdi_parser {
                 // startxref found
                 $startxref = $matches[1][0];
             } else {
-                $this->Error('Unable to find startxref');
+                $this->error('Unable to find startxref');
             }
         }
         unset($matches);
@@ -363,7 +363,7 @@ class tcpdi_parser {
             $xref = $this->decodeXrefStream($startxref, $xref);
         }
         if (empty($xref)) {
-            $this->Error('Unable to find xref');
+            $this->error('Unable to find xref');
         }
 
         return $xref;
@@ -448,7 +448,7 @@ class tcpdi_parser {
             }
             unset($matches);
         } else {
-            $this->Error('Unable to find trailer');
+            $this->error('Unable to find trailer');
         }
         return $xref;
     }
@@ -607,7 +607,7 @@ class tcpdi_parser {
                             break;
                         }
                         default: { // PNG prediction (on encoding, PNG optimum)
-                            $this->Error("Unknown PNG predictor $predictor");
+                            $this->error("Unknown PNG predictor $predictor");
                             break;
                         }
                     }
@@ -944,7 +944,7 @@ class tcpdi_parser {
     protected function getIndirectObject($obj_ref, $offset=0, $decoding=true) {
         $obj = explode('_', $obj_ref);
         if (($obj === false) || (count($obj) != 2)) {
-            $this->Error('Invalid object reference: '.$obj);
+            $this->error('Invalid object reference: '.$obj);
             return;
         }
         $objref = $obj[0].' '.$obj[1].' obj';
@@ -1441,7 +1441,7 @@ class tcpdi_parser {
                 return false;
             } else {
                 $res = $this->_getPageRotation($obj[1][1]['/Parent']);
-                if (is_array($res) && $res[0] == PDF_TYPE_OBJECT)
+                if (is_array($res) && $res[0] == PDF_TYPE_OBJECT) {
                     return $res[1];
                 }
                 return $res;
@@ -1455,12 +1455,13 @@ class tcpdi_parser {
      * @public
      * @since 1.0.000 (2011-05-23)
      */
-    public function Error($msg) {
-        // exit program and print error
-        die("<strong>TCPDI_PARSER ERROR [{$this->uniqueid}]: </strong>".$msg);
+    public function error($msg) {
+        throw new TcpdiParserException($msg);
     }
 
 } // END OF TCPDF_PARSER CLASS
+
+class TcpdiParserException extends Exception {}
 
 //============================================================+
 // END OF FILE
