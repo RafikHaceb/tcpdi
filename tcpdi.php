@@ -141,7 +141,7 @@ class TCPDI extends FPDF_TPL
      * @param string $filename
      * @return tcpdi_parser
      */
-    protected function _getPdfParser($filename)
+    protected function _getPdfParser(string $filename): tcpdi_parser
     {
         $data = file_get_contents($filename);
         return new tcpdi_parser($data, $filename);
@@ -173,7 +173,7 @@ class TCPDI extends FPDF_TPL
      * @param int $pageno pagenumber
      * @return int Index of imported page - to use with fpdf_tpl::useTemplate()
      */
-    public function importPage($pageno, $boxName = '/CropBox')
+    public function importPage(int $pageno, string $boxName = '/CropBox'): int
     {
         if ($this->_intpl) {
             $this->Error('Please import the desired pages before creating a new template.');
@@ -404,10 +404,15 @@ class TCPDI extends FPDF_TPL
         return $this->lastUsedPageBox;
     }
 
-
-    public function useTemplate($tplidx, $_x = null, $_y = null, $_w = 0, $_h = 0, $adjustPageSize = false)
-    {
-        if ($adjustPageSize == true && is_null($_x) && is_null($_y)) {
+    public function useTemplate(
+        int $tplidx,
+        ?int $_x = null,
+        ?int $_y = null,
+        ?int $_w = 0,
+        ?int $_h = 0,
+        bool $adjustPageSize = false
+    ): array {
+        if ($adjustPageSize && is_null($_x) && is_null($_y)) {
             $size = $this->getTemplateSize($tplidx, $_w, $_h);
             $orientation = $size['w'] > $size['h'] ? 'L' : 'P';
             $size = [$size['w'], $size['h']];
@@ -456,11 +461,10 @@ class TCPDI extends FPDF_TPL
         }
     }
 
-
     /**
      * Private Method that writes the form xobjects
      */
-    public function _putformxobjects()
+    private function _putformxobjects()
     {
         $filter = ($this->compress) ? '/Filter /FlateDecode ' : '';
         reset($this->tpls);
@@ -493,7 +497,7 @@ class TCPDI extends FPDF_TPL
                 $tx = -$tpl['box']['llx'];
                 $ty = -$tpl['box']['lly'];
 
-                if ($tpl['_rotationAngle'] <> 0) {
+                if ($tpl['_rotationAngle'] != 0) {
                     $angle = $tpl['_rotationAngle'] * M_PI / 180;
                     $c = cos($angle);
                     $s = sin($angle);
@@ -558,8 +562,8 @@ class TCPDI extends FPDF_TPL
                         }
                     }
                     if (isset($this->_res['tpl'][$tplidx]['tpls']) && count($this->_res['tpl'][$tplidx]['tpls'])) {
-                        foreach ($this->_res['tpl'][$tplidx]['tpls'] as $i => $tpl) {
-                            $this->_out($this->tplprefix . $i . ' ' . $tpl['n'] . ' 0 R');
+                        foreach ($this->_res['tpl'][$tplidx]['tpls'] as $i => $tpl2) {
+                            $this->_out($this->tplprefix . $i . ' ' . $tpl2['n'] . ' 0 R');
                         }
                     }
                     $this->_out('>>');
@@ -760,7 +764,7 @@ class TCPDI extends FPDF_TPL
      * rewritten to close opened parsers
      *
      */
-    protected function _enddoc()
+    protected function _enddoc(): void
     {
         parent::_enddoc();
         $this->_closeParsers();
@@ -769,7 +773,7 @@ class TCPDI extends FPDF_TPL
     /**
      * close all files opened by parsers
      */
-    protected function _closeParsers()
+    protected function _closeParsers(): bool
     {
         if ($this->state > 2 && count($this->parsers) > 0) {
             $this->cleanUp();
@@ -781,7 +785,7 @@ class TCPDI extends FPDF_TPL
     /**
      * Removes cylced references and closes the file handles of the parser objects
      */
-    public function cleanUp()
+    public function cleanUp(): void
     {
         foreach ($this->parsers as $k => $_) {
             $this->parsers[$k]->cleanUp();
@@ -791,12 +795,12 @@ class TCPDI extends FPDF_TPL
     }
 
     // Functions from here on are taken from FPDI's fpdi2tcpdf_bridge.php to remove dependence on it
-    protected function _putstream($s, $n = 0)
+    protected function _putstream($s, $n = 0): void
     {
         $this->_out($this->_getstream($s, $n));
     }
 
-    protected function _getxobjectdict()
+    protected function _getxobjectdict(): string
     {
         $out = parent::_getxobjectdict();
         if (count($this->tpls)) {
@@ -814,7 +818,7 @@ class TCPDI extends FPDF_TPL
      * @param string $s
      * @return string
      */
-    protected function _unescape($s)
+    protected function _unescape(string $s): string
     {
         $out = '';
         for ($count = 0, $n = strlen($s); $count < $n; $count++) {
@@ -881,7 +885,7 @@ class TCPDI extends FPDF_TPL
      * @param string $hex
      * @return string
      */
-    public function hex2str($hex)
+    public function hex2str(string $hex): string
     {
         return pack('H*', str_replace(["\r", "\n", ' '], '', $hex));
     }
@@ -892,7 +896,7 @@ class TCPDI extends FPDF_TPL
      * @param string $str
      * @return string
      */
-    public function str2hex($str)
+    public function str2hex(string $str): string
     {
         return current(unpack('H*', $str));
     }
