@@ -331,7 +331,7 @@ class TCPDI extends FPDF_TPL {
             // Offset page number to account for TOC being inserted before page containing annotations.
             $n -= $this->_numTOCpages;
         }
-        if (!(isset($this->_importedAnnots[$n]) OR isset($this->PageAnnots[$n]) OR ($this->sign AND isset($this->signature_data['cert_type'])))) {
+        if (!(isset($this->_importedAnnots[$n]) || isset($this->PageAnnots[$n]) || ($this->sign && isset($this->signature_data['cert_type'])))) {
             return '';
         }
         $out = ' /Annots [';
@@ -355,7 +355,7 @@ class TCPDI extends FPDF_TPL {
                 }
             }
         }
-        if ($this->sign AND ($n == $this->signature_appearance['page']) AND isset($this->signature_data['cert_type'])) {
+        if ($this->sign && ($n == $this->signature_appearance['page']) && isset($this->signature_data['cert_type'])) {
             // set reference for signature object
             $out .= ' '.$this->sig_obj_id.' 0 R';
         }
@@ -700,7 +700,7 @@ class TCPDI extends FPDF_TPL {
             if ($this->inxobj) {
                 // we are inside an XObject template
                 $this->xobjects[$this->xobjid]['outdata'] .= $s;
-            } elseif ((!$this->InFooter) AND isset($this->footerlen[$this->page]) AND ($this->footerlen[$this->page] > 0)) {
+            } elseif ((!$this->InFooter) && isset($this->footerlen[$this->page]) && ($this->footerlen[$this->page] > 0)) {
                 // puts data before page footer
                 $pagebuff = $this->getPageBuffer($this->page);
                 $page = substr($pagebuff, 0, -$this->footerlen[$this->page]);
