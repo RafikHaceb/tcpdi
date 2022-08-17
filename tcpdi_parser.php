@@ -735,8 +735,7 @@ class tcpdi_parser {
                 $next = strcspn($data, "\r\n", $offset);
                 if ($next > 0) {
                     $offset += $next;
-                    list($obj, $unused) = $this->getRawObject($offset, $data);
-                    return $obj;
+                    return $this->getRawObject($offset, $data);
                 }
                 break;
             }
@@ -1026,7 +1025,7 @@ class tcpdi_parser {
                 $objs = $streaminfo[0];
                 if (!isset($this->objstreams[$objs[0]][$objs[1]])) {
                     // Fetch and decode object stream
-                    $offset = $this->findObjectOffset($objs);;
+                    $offset = $this->findObjectOffset($objs);
                     $objstream = $this->getObjectVal([PDF_TYPE_OBJREF, $objs[0], $objs[1]]);
                     $decoded = $this->decodeStream($objstream[1][1], $objstream[2][1]);
                     $this->objstreams[$objs[0]][$objs[1]] = $decoded[0]; // Store just the data, in case we need more from this objstream
@@ -1220,7 +1219,7 @@ class tcpdi_parser {
         // parent object.
         if (isset ($obj[1][1]['/Resources'])) {
             $res = $obj[1][1]['/Resources'];
-            if ($res[0] == PDF_TYPE_OBJECT) {
+            if (is_array($res) && $res[0] == PDF_TYPE_OBJECT) {
                 return $res[1];
             }
             return $res;
@@ -1229,7 +1228,7 @@ class tcpdi_parser {
                 return false;
             } else {
                 $res = $this->_getPageResources($obj[1][1]['/Parent']);
-                if ($res[0] == PDF_TYPE_OBJECT) {
+                if (is_array($res) && $res[0] == PDF_TYPE_OBJECT) {
                     return $res[1];
                 }
                 return $res;
@@ -1439,7 +1438,7 @@ class tcpdi_parser {
         $obj = $this->getObjectVal($obj);
         if (isset ($obj[1][1]['/Rotate'])) {
             $res = $this->getObjectVal($obj[1][1]['/Rotate']);
-            if ($res[0] == PDF_TYPE_OBJECT) {
+            if (is_array($res) && $res[0] == PDF_TYPE_OBJECT) {
                 return $res[1];
             }
             return $res;
