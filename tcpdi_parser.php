@@ -746,6 +746,14 @@ class tcpdi_parser
         }
         $objtype = ''; // object type to be returned
         $objval = ''; // object value to be returned
+
+        // We have a bad offset, this is likely due to poor initial authoring. Return an empty object to break out of the loop and not error out due to an unspecified offset.
+        if(!isset($data[$offset]))
+        {
+            return [[ $objval, $objtype], 0];
+        }
+
+
         // skip initial white space chars: \x00 null (NUL), \x09 horizontal tab (HT), \x0A line feed (LF), \x0C form feed (FF), \x0D carriage return (CR), \x20 space (SP)
         while (strspn($data[$offset], "\x00\x09\x0a\x0c\x0d\x20") == 1) {
             $offset++;
@@ -856,7 +864,10 @@ class tcpdi_parser
                 }
                 break;
             default:
-                $frag = $data[$offset] . @$data[$offset + 1] . @$data[$offset + 2] . @$data[$offset + 3];
+                $frag = $data[ $offset ] ?? '';
+                $frag .= $data[ $offset + 1 ] ?? '';
+                $frag .= $data[ $offset + 2 ] ?? '';
+                $frag .= $data[ $offset + 3 ] ?? '';
                 switch ($frag) {
                     case 'endo':
                         // indirect object
@@ -1022,7 +1033,7 @@ class tcpdi_parser
             }
             $objdata[$i] = $element;
             ++$i;
-        } while ($element[0] != 'endobj');
+        } while ($element[0] != 'endobj' && ($element[0] !== '' && $element[1] !== '') );
         // remove closing delimiter
         array_pop($objdata);
         // return raw object content
