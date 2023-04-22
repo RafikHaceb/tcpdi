@@ -853,10 +853,10 @@ class tcpdi_parser
                     ++$offset;
                     // The "Panose" entry in the FontDescriptor Style dict seems to have hex bytes separated by spaces.
                     if ($char == '<' && preg_match(
-                                '/^([0-9A-Fa-f ]+)[>]/iU',
-                                substr($data, $offset),
-                                $matches
-                            ) == 1) {
+                            '/^([0-9A-Fa-f ]+)[>]/iU',
+                            substr($data, $offset),
+                            $matches
+                        ) == 1) {
                         $objval = $matches[1];
                         $offset += strlen($matches[0]);
                         unset($matches);
@@ -925,8 +925,8 @@ class tcpdi_parser
                         }
                         unset($matches);
                         break;
-                break;
-            }
+                        break;
+                }
         }
         $obj = [];
         $obj[] = $objtype;
@@ -945,25 +945,28 @@ class tcpdi_parser
         $objval = [];
 
         // Extract dict from data.
-        $i = 1;
+        $i=2;
         $dict = '';
         $offset += 2;
         do {
-            if ($data[$offset] == '>' && $data[$offset + 1] == '>') {
-                $i--;
+            if ($data[$offset] == '>' && $data[$offset+1] == '>') {
+                $i -= 2;
                 $dict .= '>>';
                 $offset += 2;
+            } else if ($data[$offset] == '<' && $data[$offset+1] == '<') {
+                $i += 2;
+                $dict .= '<<';
+                $offset += 2;
             } else {
-                if ($data[$offset] == '<' && $data[$offset + 1] == '<') {
+                if ($data[$offset] == '<') {
                     $i++;
-                    $dict .= '<<';
-                    $offset += 2;
-                } else {
-                    $dict .= $data[$offset];
-                    $offset++;
+                } else if ($data[$offset] == '>') {
+                    $i--;
                 }
+                $dict .= $data[$offset];
+                $offset++;
             }
-        } while ($i > 0);
+        } while ($i>0);
 
         // Now that we have just the dict, parse it.
         $dictoffset = 0;
@@ -1211,9 +1214,18 @@ class tcpdi_parser
                         $stream = substr($stream, 0, $declength);
                         $slength = $declength;
                     }
-                } elseif ($k === '/Filter') {
-                    // single filter
-                    $filters[] = $v[1];
+                } elseif ($k == '/Filter') {
+                    if ($v[0] == PDF_TYPE_TOKEN) {
+                        // single filter
+                        $filters[] = $v[1];
+                    } elseif ($v[0] == PDF_TYPE_ARRAY) {
+                        // array of filters
+                        foreach ($v[1] as $flt) {
+                            if ($flt[0] == PDF_TYPE_TOKEN) {
+                                $filters[] = $flt[1];
+                            }
+                        }
+                    }
                 }
             }
         }
