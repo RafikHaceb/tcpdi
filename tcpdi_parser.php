@@ -329,7 +329,7 @@ class tcpdi_parser
      */
     public function getPageCount(): int
     {
-        return $this->page_count;
+        return $this->page_count ?? 0;
     }
 
     /**
