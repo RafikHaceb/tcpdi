@@ -329,7 +329,7 @@ class tcpdi_parser
      */
     public function getPageCount(): int
     {
-        return $this->page_count;
+        return $this->page_count ?? 0;
     }
 
     /**
@@ -746,6 +746,14 @@ class tcpdi_parser
         }
         $objtype = ''; // object type to be returned
         $objval = ''; // object value to be returned
+
+        // We have a bad offset, this is likely due to poor initial authoring. Return an empty object to break out of the loop and not error out due to an unspecified offset.
+        if(!isset($data[$offset]))
+        {
+            return [[ $objval, $objtype], 0];
+        }
+
+
         // skip initial white space chars: \x00 null (NUL), \x09 horizontal tab (HT), \x0A line feed (LF), \x0C form feed (FF), \x0D carriage return (CR), \x20 space (SP)
         while (strspn($data[$offset], "\x00\x09\x0a\x0c\x0d\x20") == 1) {
             $offset++;
@@ -845,10 +853,10 @@ class tcpdi_parser
                     ++$offset;
                     // The "Panose" entry in the FontDescriptor Style dict seems to have hex bytes separated by spaces.
                     if ($char == '<' && preg_match(
-                                '/^([0-9A-Fa-f ]+)[>]/iU',
-                                substr($data, $offset),
-                                $matches
-                            ) == 1) {
+                            '/^([0-9A-Fa-f ]+)[>]/iU',
+                            substr($data, $offset),
+                            $matches
+                        ) == 1) {
                         $objval = $matches[1];
                         $offset += strlen($matches[0]);
                         unset($matches);
@@ -856,7 +864,10 @@ class tcpdi_parser
                 }
                 break;
             default:
-                $frag = $data[$offset] . @$data[$offset + 1] . @$data[$offset + 2] . @$data[$offset + 3];
+                $frag = $data[ $offset ] ?? '';
+                $frag .= $data[ $offset + 1 ] ?? '';
+                $frag .= $data[ $offset + 2 ] ?? '';
+                $frag .= $data[ $offset + 3 ] ?? '';
                 switch ($frag) {
                     case 'endo':
                         // indirect object
@@ -914,8 +925,8 @@ class tcpdi_parser
                         }
                         unset($matches);
                         break;
-                break;
-            }
+                        break;
+                }
         }
         $obj = [];
         $obj[] = $objtype;
@@ -934,25 +945,28 @@ class tcpdi_parser
         $objval = [];
 
         // Extract dict from data.
-        $i = 1;
+        $i=2;
         $dict = '';
         $offset += 2;
         do {
-            if ($data[$offset] == '>' && $data[$offset + 1] == '>') {
-                $i--;
+            if ($data[$offset] == '>' && $data[$offset+1] == '>') {
+                $i -= 2;
                 $dict .= '>>';
                 $offset += 2;
+            } else if ($data[$offset] == '<' && $data[$offset+1] == '<') {
+                $i += 2;
+                $dict .= '<<';
+                $offset += 2;
             } else {
-                if ($data[$offset] == '<' && $data[$offset + 1] == '<') {
+                if ($data[$offset] == '<') {
                     $i++;
-                    $dict .= '<<';
-                    $offset += 2;
-                } else {
-                    $dict .= $data[$offset];
-                    $offset++;
+                } else if ($data[$offset] == '>') {
+                    $i--;
                 }
+                $dict .= $data[$offset];
+                $offset++;
             }
-        } while ($i > 0);
+        } while ($i>0);
 
         // Now that we have just the dict, parse it.
         $dictoffset = 0;
@@ -1022,7 +1036,7 @@ class tcpdi_parser
             }
             $objdata[$i] = $element;
             ++$i;
-        } while ($element[0] != 'endobj');
+        } while ($element[0] != 'endobj' && ($element[0] !== '' && $element[1] !== '') );
         // remove closing delimiter
         array_pop($objdata);
         // return raw object content
@@ -1200,9 +1214,18 @@ class tcpdi_parser
                         $stream = substr($stream, 0, $declength);
                         $slength = $declength;
                     }
-                } elseif ($k === '/Filter') {
-                    // single filter
-                    $filters[] = $v[1];
+                } elseif ($k == '/Filter') {
+                    if ($v[0] == PDF_TYPE_TOKEN) {
+                        // single filter
+                        $filters[] = $v[1];
+                    } elseif ($v[0] == PDF_TYPE_ARRAY) {
+                        // array of filters
+                        foreach ($v[1] as $flt) {
+                            if ($flt[0] == PDF_TYPE_TOKEN) {
+                                $filters[] = $flt[1];
+                            }
+                        }
+                    }
                 }
             }
         }
