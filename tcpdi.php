@@ -98,11 +98,8 @@ class TCPDI extends FPDF_TPL
 
     /**
      * Set a source-file
-     *
-     * @param string $filename a valid filename
-     * @return int number of available pages
      */
-    public function setSourceFile($filename)
+    public function setSourceFile(string $filename): int
     {
         $this->current_filename = $filename;
 
@@ -117,11 +114,8 @@ class TCPDI extends FPDF_TPL
 
     /**
      * Set a source-file PDF data
-     *
-     * @param string $pdfdata The PDF file content
-     * @return int number of available pages
      */
-    public function setSourceData($pdfdata)
+    public function setSourceData(string $pdfdata): int
     {
         $filename = uniqid('tcpdi-');
         $this->current_filename = $filename;
@@ -149,10 +143,8 @@ class TCPDI extends FPDF_TPL
 
     /**
      * Get the current PDF version
-     *
-     * @return string
      */
-    public function getPDFVersion()
+    public function getPDFVersion(): string
     {
         return $this->PDFVersion;
     }
@@ -311,9 +303,7 @@ class TCPDI extends FPDF_TPL
 
         if (is_array($annots) && $annots[0] == PDF_TYPE_OBJECT // We got an object
             && is_array($annots[1]) && $annots[1][0] == PDF_TYPE_ARRAY // It's an array
-            && is_array($annots[1][1]) && count(
-                $annots[1][1]
-            ) > 1 // It's not empty - there are annotations for this page
+            && is_array($annots[1][1]) && count($annots[1][1]) > 1 // It's not empty - there are annotations for this page
         ) {
             if (!isset($this->_obj_stack[$fn])) {
                 $this->_obj_stack[$fn] = [];
@@ -348,7 +338,7 @@ class TCPDI extends FPDF_TPL
      * @author Nicola Asuni
      * @since 5.0.010 (2010-05-17)
      */
-    protected function _getannotsrefs($n)
+    protected function _getannotsrefs($n): string
     {
         if (!empty($this->_numTOCpages) && $n >= $this->_TOCpagenum) {
             // Offset page number to account for TOC being inserted before page containing annotations.
@@ -359,19 +349,19 @@ class TCPDI extends FPDF_TPL
         }
         $out = ' /Annots [';
         if (isset($this->_importedAnnots[$n])) {
-            foreach ($this->_importedAnnots[$n] as $key => $val) {
+            foreach ($this->_importedAnnots[$n] as $val) {
                 $out .= ' ' . $val . ' 0 R';
             }
         }
         if (isset($this->PageAnnots[$n])) {
-            foreach ($this->PageAnnots[$n] as $key => $val) {
+            foreach ($this->PageAnnots[$n] as $val) {
                 if (!in_array($val['n'], $this->radio_groups)) {
                     $out .= ' ' . $val['n'] . ' 0 R';
                 }
             }
             // add radiobutton groups
             if (isset($this->radiobutton_groups[$n])) {
-                foreach ($this->radiobutton_groups[$n] as $key => $data) {
+                foreach ($this->radiobutton_groups[$n] as $data) {
                     if (isset($data['n'])) {
                         $out .= ' ' . $data['n'] . ' 0 R';
                     }
@@ -396,10 +386,8 @@ class TCPDI extends FPDF_TPL
 
     /**
      * Returns the last used page box
-     *
-     * @return string
      */
-    public function getLastUsedPageBox()
+    public function getLastUsedPageBox(): string
     {
         return $this->lastUsedPageBox;
     }
@@ -481,10 +469,10 @@ class TCPDI extends FPDF_TPL
             $this->_out(
                 sprintf(
                     '/BBox [%.2F %.2F %.2F %.2F]',
-                    (isset($tpl['box']['llx']) ? $tpl['box']['llx'] : $tpl['x']) * $this->k,
-                    (isset($tpl['box']['lly']) ? $tpl['box']['lly'] : -$tpl['y']) * $this->k,
-                    (isset($tpl['box']['urx']) ? $tpl['box']['urx'] : $tpl['w'] + $tpl['x']) * $this->k,
-                    (isset($tpl['box']['ury']) ? $tpl['box']['ury'] : $tpl['h'] - $tpl['y']) * $this->k
+                    ($tpl['box']['llx'] ?? $tpl['x']) * $this->k,
+                    ($tpl['box']['lly'] ?? -$tpl['y']) * $this->k,
+                    ($tpl['box']['urx'] ?? $tpl['w'] + $tpl['x']) * $this->k,
+                    ($tpl['box']['ury'] ?? $tpl['h'] - $tpl['y']) * $this->k
                 )
             );
 
@@ -775,7 +763,7 @@ class TCPDI extends FPDF_TPL
      */
     protected function _closeParsers(): bool
     {
-        if ($this->state > 2 && count($this->parsers) > 0) {
+        if ($this->state > 2 && is_array($this->parsers) && count($this->parsers) > 0) {
             $this->cleanUp();
             return true;
         }

@@ -250,7 +250,7 @@ class tcpdi_parser
      * And reset the PDF Version used in FPDI if needed
      * @public
      */
-    public function getPDFVersion()
+    public function getPDFVersion(): string
     {
         preg_match('/\d\.\d/', substr($this->pdfdata, 0, 16), $m);
         if (isset($m[0])) {
@@ -329,7 +329,7 @@ class tcpdi_parser
      */
     public function getPageCount(): int
     {
-        return $this->page_count;
+        return $this->page_count ?? 0;
     }
 
     /**
@@ -376,8 +376,12 @@ class tcpdi_parser
             // Cross-Reference
             $xref = $this->decodeXref($startxref, $xref);
         } else {
-            // Cross-Reference Stream
-            $xref = $this->decodeXrefStream($startxref, $xref);
+            try {
+                // Cross-Reference Stream
+                $xref = $this->decodeXrefStream($startxref, $xref);
+            } catch (Exception $e){
+                $xref = $this->decodeXref($startxref, $xref);
+            }
         }
         if (empty($xref)) {
             $this->error('Unable to find xref');
@@ -414,7 +418,7 @@ class tcpdi_parser
                 PREG_OFFSET_CAPTURE,
                 $offset
             ) > 0) {
-            $offset = strlen($matches[0][0]) + $matches[0][1];
+            $offset = strlen($matches[0][0]) + (int) $matches[0][1];
             if (isset($matches[3][0]) && $matches[3][0] == 'n') {
                 // create unique object index: [object number]_[generation number]
                 $gen_num = intval($matches[2][0]);
@@ -746,6 +750,13 @@ class tcpdi_parser
         }
         $objtype = ''; // object type to be returned
         $objval = ''; // object value to be returned
+
+        // We have a bad offset, this is likely due to poor initial authoring.
+        // Return an empty object to break out of the loop and not error out due to an unspecified offset.
+        if (!isset($data[$offset])) {
+            return [[$objval, $objtype], 0];
+        }
+
         // skip initial white space chars: \x00 null (NUL), \x09 horizontal tab (HT), \x0A line feed (LF), \x0C form feed (FF), \x0D carriage return (CR), \x20 space (SP)
         while (strspn($data[$offset], "\x00\x09\x0a\x0c\x0d\x20") == 1) {
             $offset++;
@@ -845,10 +856,10 @@ class tcpdi_parser
                     ++$offset;
                     // The "Panose" entry in the FontDescriptor Style dict seems to have hex bytes separated by spaces.
                     if ($char == '<' && preg_match(
-                                '/^([0-9A-Fa-f ]+)[>]/iU',
-                                substr($data, $offset),
-                                $matches
-                            ) == 1) {
+                            '/^([0-9A-Fa-f ]+)[>]/iU',
+                            substr($data, $offset),
+                            $matches
+                        ) == 1) {
                         $objval = $matches[1];
                         $offset += strlen($matches[0]);
                         unset($matches);
@@ -856,7 +867,7 @@ class tcpdi_parser
                 }
                 break;
             default:
-                $frag = $data[$offset] . @$data[$offset + 1] . @$data[$offset + 2] . @$data[$offset + 3];
+                $frag = substr($data, $offset, 4);
                 switch ($frag) {
                     case 'endo':
                         // indirect object
@@ -914,8 +925,7 @@ class tcpdi_parser
                         }
                         unset($matches);
                         break;
-                break;
-            }
+                }
         }
         $obj = [];
         $obj[] = $objtype;
@@ -984,7 +994,7 @@ class tcpdi_parser
     {
         $obj = explode('_', $obj_ref);
         if ($obj === false || count($obj) != 2) {
-            $this->error('Invalid object reference: ' . $obj);
+            $this->error('Invalid object reference: ' . json_encode($obj));
         }
         $objref = $obj[0] . ' ' . $obj[1] . ' obj';
 
