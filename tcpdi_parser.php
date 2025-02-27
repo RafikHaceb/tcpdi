@@ -256,7 +256,7 @@ class tcpdi_parser
         if (isset($m[0])) {
             $this->pdfVersion = $m[0];
         }
-        return $this->pdfVersion;
+        return $this->pdfVersion ?? '';
     }
 
     /**
