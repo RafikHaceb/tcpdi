@@ -306,6 +306,7 @@ class FPDF_TPL extends FPDF
 
     /**
      * See FPDF/TCPDF-Documentation ;-)
+     * @return mixed
      */
     public function Image(
         $file,
